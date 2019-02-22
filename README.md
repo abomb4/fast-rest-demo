@@ -18,7 +18,12 @@ docker run -p 27017:27017 -v $HOME/docker_mongodb:/data/db -d mongo
 > Note: modify `$HOME/docker_mongodb` to your favorite MongoDB data file path.
 
 ### Run Demo
-To run this demo temporary, simple use this commands:
+To run this demo temporary, you may need some global packages:
+```
+npm install -g nodemon
+```
+
+Then run:
 ```
 git clone https://github.com/abomb4/fast-rest-demo
 cd fast-rest-demo
@@ -52,4 +57,7 @@ If you want **deploy** this demo, you may need `pm2` to do this:
   Use `pm2 show <id|name>` to get more details about an app
   ```
   Then we can use `pm2 show 0` to confirm the status of daemon we run.
-  
+
+# See also
+- [Mongoose documention](https://mongoosejs.com/docs/guide.html)
+- [Fastify documention](https://www.fastify.io/docs/latest/Getting-Started/)

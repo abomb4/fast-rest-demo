@@ -1,4 +1,5 @@
-import * as userController from './controller/user';
+import boom from 'boom';
+import { respSuccess, paginateRespSuccess } from './common/dto';
 import User from './model/user';
 
 export function createCrudRoutes(baseUrl, defination) {
@@ -8,8 +9,21 @@ export function createCrudRoutes(baseUrl, defination) {
       url: baseUrl,
       handler: async (req, reply) => {
         try {
-          const users = await User.find()
-          return users
+          const { pageSize, currPage, ...query } = req.query;
+          const pageOption = {
+            pageSize: parseInt(pageSize) || 10,
+            pageNo: parseInt(currPage) || 1
+          };
+          console.log("query:", query);
+          const instances = await defination.find(query)
+            .sort({id: -1})
+            .skip((pageOption.pageNo - 1) * pageOption.pageSize)
+            .limit(pageOption.pageSize)
+            .exec();
+
+          const total = await defination.count(query);
+
+          return paginateRespSuccess(pageOption.pageNo, pageOption.pageSize, total, instances);
         } catch (err) {
           throw boom.boomify(err)
         }
@@ -21,8 +35,8 @@ export function createCrudRoutes(baseUrl, defination) {
       handler: async (req, reply) => {
         try {
           const id = req.params.id
-          const user = await User.findById(id)
-          return user
+          const instance = await defination.findById(id)
+          return respSuccess(instance);
         } catch (err) {
           throw boom.boomify(err)
         }
@@ -34,7 +48,7 @@ export function createCrudRoutes(baseUrl, defination) {
       handler: async (req, reply) => {
         try {
           const instance = new defination(req.body)
-          return instance.save()
+          return respSuccess(instance.save())
         } catch (err) {
           throw boom.boomify(err)
         }
@@ -49,7 +63,7 @@ export function createCrudRoutes(baseUrl, defination) {
           const instance = req.body
           const { ...updateData } = instance
           const update = await defination.findByIdAndUpdate(id, updateData, { new: true })
-          return update
+          return respSuccess(update)
         } catch (err) {
           throw boom.boomify(err)
         }
@@ -62,7 +76,7 @@ export function createCrudRoutes(baseUrl, defination) {
         try {
           const id = req.params.id
           const instance = await defination.findByIdAndRemove(id)
-          return instance
+          return respSuccess(instance)
         } catch (err) {
           throw boom.boomify(err)
         }
